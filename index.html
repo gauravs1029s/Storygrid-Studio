@@ -82,7 +82,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:900;height:var(--nh);display:fle
 /* HERO */
 .hero{min-height:calc(100vh - var(--nh));display:grid;place-items:center;position:relative;overflow:hidden;padding:4rem clamp(1.5rem,6vw,6rem);text-align:center;}
 .hgrid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black,transparent);}
-.hglow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,var(--ndim) 0%,transparent 70%);pointer-events:none;}
+.hglow{position:absolute;top:20%;right:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,var(--ndim) 0%,transparent 70%);pointer-events:none;}
 .hc{position:relative;z-index:2;max-width:920px;}
 .hbadge{display:inline-flex;align-items:center;gap:.6rem;padding:.4rem 1rem;border:1px solid var(--border);border-radius:100px;font-family:var(--fh);font-size:.75rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--neon);margin-bottom:2rem;animation:fu .8s both;}
 .hbadge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--neon);animation:pulse 2s infinite;}
@@ -268,7 +268,7 @@ footer{background:var(--dark);border-top:1px solid var(--border);padding:clamp(3
   <div class="logo" onclick="showPage('home')">Story<span class="n">grid</span>&nbsp;Studio</div>
   <ul class="nl">
     <li><a href="#" onclick="showPage('home');return false;" data-page="home" class="active">Home</a></li>
-    <li><a href="#" onclick="showPage('portfolio');return false;" data-page="portfolio">Portfolio</a></li>
+    <li><a href="#" onclick="showPage('our services');return false;" data-page="portfolio">Portfolio</a></li>
     <li><a href="#" onclick="showPage('about');return false;" data-page="about">About</a></li>
     <li><a href="#" onclick="showPage('contact');return false;" data-page="contact" class="ncta">Get a Quote</a></li>
   </ul>

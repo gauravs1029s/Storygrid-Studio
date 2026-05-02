@@ -690,13 +690,34 @@
     formData.append('message', msg);
     formData.append('from_name', 'Storygrid Studio Website');
 
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
+    // Google Sheet URL
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyQ-tm51Oo0C4oZJdk-Ym4UE3aHrKhJMyHBfR2kghE5ukXHXk1tKYjWUMt38GqW_Y5S3A/exec';
 
+    try {
+      // Send to BOTH Web3Forms (email) AND Google Sheet at same time
+      const [web3res] = await Promise.all([
+        // 1. Web3Forms — email notification
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: formData
+        }),
+        // 2. Google Sheet — save response
+        fetch(SHEET_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name:    name,
+            email:   email,
+            phone:   phone,
+            service: service.value,
+            budget:  budget.value,
+            message: msg
+          })
+        })
+      ]);
+
+      const data = await web3res.json();
       document.getElementById('gf-sending').style.display='none';
 
       if(data.success){

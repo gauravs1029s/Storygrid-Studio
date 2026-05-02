@@ -658,24 +658,8 @@
     document.querySelectorAll('.pi').forEach(i=>{i.style.display=(cat==='all'||i.dataset.cat===cat)?'block':'none';});
   }
 
-  // ===================== GOOGLE FORM SUBMIT =====================
-  // Your Google Form ID
-  const FORM_ID = '1FAIpQLSeZ3hfjKY8AcVA3Zu2ONfPmrTlBypnYcWmxVqSva2Vipzx_AQ';
-  const FORM_URL = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
-
-  // NOTE: Entry IDs below need to be updated with your actual Google Form entry IDs.
-  // To find them: Open your form → Right-click → View Page Source → Ctrl+F → search "entry."
-  // Each field has a unique entry.XXXXXXXXX number.
-  const ENTRIES = {
-    name:    'entry.798902175',    // Full Name
-    email:   'entry.1998118681',   // Email Address
-    phone:   'entry.620754173',    // Phone Number
-    service: 'entry.105574430',   // Service Interested In
-    budget:  'entry.828285277',   // Monthly Budget
-    message: 'entry.1279941726'   // Project Details
-  };
-
-  function submitGForm(){
+  // ===================== WEB3FORMS SUBMIT =====================
+  async function submitGForm(){
     const name    = document.getElementById('gf-name').value.trim();
     const email   = document.getElementById('gf-email').value.trim();
     const phone   = document.getElementById('gf-phone').value.trim();
@@ -689,58 +673,49 @@
 
     if(!name || !email || !service || !budget || !msg){
       document.getElementById('gf-error').style.display='block';
-      document.getElementById('gf-error').textContent='❌ Please fill in all required fields (marked with *).';
+      document.getElementById('gf-error').textContent='Please fill in all required fields (marked with *).';
       return;
     }
 
     document.getElementById('gf-sending').style.display='block';
 
-    // Hidden iframe trick — only reliable way to submit to Google Forms from website
-    let iframe = document.getElementById('gf-iframe');
-    if(!iframe){
-      iframe = document.createElement('iframe');
-      iframe.id = 'gf-iframe';
-      iframe.name = 'gf-iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-    }
+    const formData = new FormData();
+    formData.append('access_key', 'ec7095ee-5de6-4cfb-8c2c-fe7ef8ce9815');
+    formData.append('subject', 'New Inquiry from ' + name + ' — Storygrid Studio');
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('phone', phone);
+    formData.append('service', service.value);
+    formData.append('budget', budget.value);
+    formData.append('message', msg);
+    formData.append('from_name', 'Storygrid Studio Website');
 
-    let hf = document.getElementById('gf-hform');
-    if(hf) hf.remove();
-    hf = document.createElement('form');
-    hf.id = 'gf-hform';
-    hf.method = 'POST';
-    hf.action = FORM_URL;
-    hf.target = 'gf-iframe';
-    hf.style.display = 'none';
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
 
-    const data = [
-      [ENTRIES.name, name],
-      [ENTRIES.email, email],
-      [ENTRIES.phone, phone],
-      [ENTRIES.service, service.value],
-      [ENTRIES.budget, budget.value],
-      [ENTRIES.message, msg]
-    ];
-    data.forEach(([k,v])=>{
-      const inp = document.createElement('input');
-      inp.type='hidden'; inp.name=k; inp.value=v;
-      hf.appendChild(inp);
-    });
-
-    document.body.appendChild(hf);
-    hf.submit();
-
-    setTimeout(()=>{
       document.getElementById('gf-sending').style.display='none';
-      document.getElementById('gf-success').style.display='block';
-      document.getElementById('gf-name').value='';
-      document.getElementById('gf-email').value='';
-      document.getElementById('gf-phone').value='';
-      document.getElementById('gf-msg').value='';
-      document.querySelectorAll('input[name="service"]').forEach(r=>r.checked=false);
-      document.querySelectorAll('input[name="budget"]').forEach(r=>r.checked=false);
-    }, 2000);
+
+      if(data.success){
+        document.getElementById('gf-success').style.display='block';
+        document.getElementById('gf-name').value='';
+        document.getElementById('gf-email').value='';
+        document.getElementById('gf-phone').value='';
+        document.getElementById('gf-msg').value='';
+        document.querySelectorAll('input[name="service"]').forEach(r=>r.checked=false);
+        document.querySelectorAll('input[name="budget"]').forEach(r=>r.checked=false);
+      } else {
+        document.getElementById('gf-error').style.display='block';
+        document.getElementById('gf-error').textContent='Something went wrong. Please WhatsApp: +91 9568465046';
+      }
+    } catch(err){
+      document.getElementById('gf-sending').style.display='none';
+      document.getElementById('gf-error').style.display='block';
+      document.getElementById('gf-error').textContent='Network error. Please WhatsApp: +91 9568465046';
+    }
   }
 
 

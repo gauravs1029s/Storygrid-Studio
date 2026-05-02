@@ -691,33 +691,28 @@
     formData.append('from_name', 'Storygrid Studio Website');
 
     // Google Sheet URL
-    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyQ-tm51Oo0C4oZJdk-Ym4UE3aHrKhJMyHBfR2kghE5ukXHXk1tKYjWUMt38GqW_Y5S3A/exec';
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzvO7uwb4V7eiIqawa2g6U6gLch2IbVDyUYeXwz_gUquyQ8go6GWCvQvv0lG0hffFykEQ/exec';
 
     try {
-      // Send to BOTH Web3Forms (email) AND Google Sheet at same time
-      const [web3res] = await Promise.all([
-        // 1. Web3Forms — email notification
-        fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          body: formData
-        }),
-        // 2. Google Sheet — save response
-        fetch(SHEET_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name:    name,
-            email:   email,
-            phone:   phone,
-            service: service.value,
-            budget:  budget.value,
-            message: msg
-          })
-        })
-      ]);
-
+      // 1. Web3Forms — email notification
+      const web3res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
       const data = await web3res.json();
+
+      // 2. Google Sheet — use GET with query params (avoids CORS issue)
+      const params = new URLSearchParams({
+        name:    name,
+        email:   email,
+        phone:   phone,
+        service: service.value,
+        budget:  budget.value,
+        message: msg
+      });
+      fetch(SHEET_URL + '?' + params.toString(), { method: 'GET' })
+        .catch(()=>{}); // silent fail — sheet save is bonus
+
       document.getElementById('gf-sending').style.display='none';
 
       if(data.success){

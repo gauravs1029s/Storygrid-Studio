@@ -667,15 +667,15 @@
   // To find them: Open your form → Right-click → View Page Source → Ctrl+F → search "entry."
   // Each field has a unique entry.XXXXXXXXX number.
   const ENTRIES = {
-    name:    'entry.2005620554',   // ← Replace with your actual entry ID for Full Name
-    email:   'entry.1045781291',   // ← Replace with your actual entry ID for Email
-    phone:   'entry.1166974658',   // ← Replace with your actual entry ID for Phone
-    service: 'entry.839337160',    // ← Replace with your actual entry ID for Service
-    budget:  'entry.1559741574',   // ← Replace with your actual entry ID for Budget
-    message: 'entry.839337161'     // ← Replace with your actual entry ID for Project Details
+    name:    'entry.798902175',    // Full Name
+    email:   'entry.1998118681',   // Email Address
+    phone:   'entry.620754173',    // Phone Number
+    service: 'entry.105574430',   // Service Interested In
+    budget:  'entry.828285277',   // Monthly Budget
+    message: 'entry.1279941726'   // Project Details
   };
 
-  async function submitGForm(){
+  function submitGForm(){
     const name    = document.getElementById('gf-name').value.trim();
     const email   = document.getElementById('gf-email').value.trim();
     const phone   = document.getElementById('gf-phone').value.trim();
@@ -683,11 +683,10 @@
     const budget  = document.querySelector('input[name="budget"]:checked');
     const msg     = document.getElementById('gf-msg').value.trim();
 
-    // Hide previous messages
     document.getElementById('gf-success').style.display='none';
     document.getElementById('gf-error').style.display='none';
+    document.getElementById('gf-sending').style.display='none';
 
-    // Validate required fields
     if(!name || !email || !service || !budget || !msg){
       document.getElementById('gf-error').style.display='block';
       document.getElementById('gf-error').textContent='❌ Please fill in all required fields (marked with *).';
@@ -696,39 +695,54 @@
 
     document.getElementById('gf-sending').style.display='block';
 
-    // Build form data
-    const body = new URLSearchParams();
-    body.append(ENTRIES.name,    name);
-    body.append(ENTRIES.email,   email);
-    body.append(ENTRIES.phone,   phone);
-    body.append(ENTRIES.service, service.value);
-    body.append(ENTRIES.budget,  budget.value);
-    body.append(ENTRIES.message, msg);
+    // Hidden iframe trick — only reliable way to submit to Google Forms from website
+    let iframe = document.getElementById('gf-iframe');
+    if(!iframe){
+      iframe = document.createElement('iframe');
+      iframe.id = 'gf-iframe';
+      iframe.name = 'gf-iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
 
-    // Submit to Google Forms (no-cors because Google doesn't allow CORS)
-    try {
-      await fetch(FORM_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: body
-      });
-      // no-cors means we can't read the response — but if fetch didn't throw, it worked
+    let hf = document.getElementById('gf-hform');
+    if(hf) hf.remove();
+    hf = document.createElement('form');
+    hf.id = 'gf-hform';
+    hf.method = 'POST';
+    hf.action = FORM_URL;
+    hf.target = 'gf-iframe';
+    hf.style.display = 'none';
+
+    const data = [
+      [ENTRIES.name, name],
+      [ENTRIES.email, email],
+      [ENTRIES.phone, phone],
+      [ENTRIES.service, service.value],
+      [ENTRIES.budget, budget.value],
+      [ENTRIES.message, msg]
+    ];
+    data.forEach(([k,v])=>{
+      const inp = document.createElement('input');
+      inp.type='hidden'; inp.name=k; inp.value=v;
+      hf.appendChild(inp);
+    });
+
+    document.body.appendChild(hf);
+    hf.submit();
+
+    setTimeout(()=>{
       document.getElementById('gf-sending').style.display='none';
       document.getElementById('gf-success').style.display='block';
-
-      // Clear form
       document.getElementById('gf-name').value='';
       document.getElementById('gf-email').value='';
       document.getElementById('gf-phone').value='';
       document.getElementById('gf-msg').value='';
       document.querySelectorAll('input[name="service"]').forEach(r=>r.checked=false);
       document.querySelectorAll('input[name="budget"]').forEach(r=>r.checked=false);
-    } catch(err){
-      document.getElementById('gf-sending').style.display='none';
-      document.getElementById('gf-error').style.display='block';
-      document.getElementById('gf-error').textContent='❌ Something went wrong. Please email me directly at storygridstudio07@gmail.com';
-    }
+    }, 2000);
   }
+
 
   // REVEAL ANIMATION
   function initReveal(){
